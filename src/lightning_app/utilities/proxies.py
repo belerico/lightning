@@ -371,7 +371,11 @@ class WorkRunner:
 
         # 8. Deepcopy the work state and send the first `RUNNING` status delta to the flow.
         state = deepcopy(self.work.state)
-        self.work._calls["latest_call_hash"] = call_hash
+        if call_hash not in self.work._calls:
+            self.work._calls["latest_call_hash"] = call_hash
+            self.work._calls[call_hash] = called["state"]["calls"][call_hash]
+        else:
+            self.work._calls["latest_call_hash"] = call_hash
         self.work._calls[call_hash]["statuses"].append(make_status(WorkStageStatus.RUNNING))
         self.delta_queue.put(ComponentDelta(id=self.work_name, delta=Delta(DeepDiff(state, self.work.state))))
 

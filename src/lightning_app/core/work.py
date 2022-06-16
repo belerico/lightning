@@ -430,7 +430,18 @@ class LightningWork(abc.ABC):
                 v = _maybe_create_drive(self.name, v)
             setattr(self, k, v)
         self._changes = provided_state["changes"]
-        self._calls.update(provided_state["calls"])
+        if len(provided_state["calls"]) > 1:
+            last_calls_key = list(provided_state["calls"].keys())[-1]
+            latest_call_hash = provided_state["calls"]["latest_call_hash"]
+            if latest_call_hash in provided_state["calls"]:
+                self._calls = {
+                    "latest_call_hash": latest_call_hash,
+                    latest_call_hash: provided_state["calls"][latest_call_hash],
+                    last_calls_key: provided_state["calls"][last_calls_key],
+                }
+        else:
+            self._calls.update(provided_state["calls"])
+
 
     @abc.abstractmethod
     def run(self, *args, **kwargs):
